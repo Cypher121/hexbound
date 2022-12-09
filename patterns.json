@@ -1,0 +1,163 @@
+[
+    {
+        "id": "hexbound:get_main_hand",
+        "defaultStartDir": "EAST",
+        "angleSignature": "adeq",
+        "pathToSource": "coffee/cypher/hexbound/feature/item_patterns/action/OpGetHeldItem.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:get_off_hand",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qeda",
+        "pathToSource": "coffee/cypher/hexbound/feature/item_patterns/action/OpGetHeldItem.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:get_inventory/stacks",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "aqwed",
+        "pathToSource": "coffee/cypher/hexbound/feature/item_patterns/action/OpGetInventoryContents.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:get_inventory/items",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "dewqa",
+        "pathToSource": "coffee/cypher/hexbound/feature/item_patterns/action/OpGetInventoryContents.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:get_entity_item",
+        "defaultStartDir": "EAST",
+        "angleSignature": "wqaqwaq",
+        "pathToSource": "coffee/cypher/hexbound/feature/item_patterns/action/OpGetEntityItem.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:get_stack_prop/item",
+        "defaultStartDir": "WEST",
+        "angleSignature": "dedqaa",
+        "pathToSource": "coffee/cypher/hexbound/feature/item_patterns/action/OpGetStackItem.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:get_stack_prop/size",
+        "defaultStartDir": "WEST",
+        "angleSignature": "dedqaq",
+        "pathToSource": "coffee/cypher/hexbound/feature/item_patterns/action/OpGetStackSize.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:rotate_pattern",
+        "defaultStartDir": "WEST",
+        "angleSignature": "deeee",
+        "pathToSource": "coffee/cypher/hexbound/feature/pattern_editing/action/OpRotatePattern.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:merge_patterns",
+        "defaultStartDir": "NORTH_WEST",
+        "angleSignature": "aqqqqa",
+        "pathToSource": "coffee/cypher/hexbound/feature/pattern_editing/action/OpMergePatterns.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:colorizer/save",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "wqwawqqawddwqwede",
+        "pathToSource": "coffee/cypher/hexbound/feature/colorizer_storage/action/OpColorizerSave.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:colorizer/load",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "wqwawqqawddwqeqaq",
+        "pathToSource": "coffee/cypher/hexbound/feature/colorizer_storage/action/OpColorizerLoad.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:colorizer/delete",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "wqwawqqawddwqwdd",
+        "pathToSource": "coffee/cypher/hexbound/feature/colorizer_storage/action/OpColorizerDelete.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:construct_get_self",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaawedee",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/OpConstructGetSelf.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:give_command/pick_up",
+        "defaultStartDir": "EAST",
+        "angleSignature": "eddeawaw",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:give_command/drop_off",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaqdwdw",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:give_command/move_to",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaqwdaqqqa",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:give_command/harvest",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaqqedwed",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:give_command/use/block",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaqdee",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:instructions/send",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaq",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/instruction/OpSendInstructions.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:instructions/broadcast",
+        "defaultStartDir": "SOUTH_EAST",
+        "angleSignature": "qqaaqqqqwq",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/instruction/OpBroadcastInstructions.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:bind_construct",
+        "defaultStartDir": "EAST",
+        "angleSignature": "wqaawddewdwewewewewew",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/OpBindConstruct.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:create_construct/spider",
+        "defaultStartDir": "SOUTH_WEST",
+        "angleSignature": "wqwqwwqwqwqwwaeqaqdwdqaqe",
+        "pathToSource": "coffee/cypher/hexbound/feature/construct/action/crafting/OpCreateSpiderConstruct.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:set_fake_impetus_player",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "qaqdaqwqaeedewd",
+        "pathToSource": "coffee/cypher/hexbound/feature/fake_circles/action/OpSetImpetusFakePlayer.kt",
+        "isPerWorld": true
+    }
+]
