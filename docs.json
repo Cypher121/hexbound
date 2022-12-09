@@ -1,4 +1,8 @@
 {
-    "lang_path": "lang/",
-    "pattern_path": "patterns.json"
+    "langPath": "lang/",
+    "patternPath": "patterns.json",
+    "sourceRoots": [
+        "src/main/kotlin",
+        "src/main/java"
+    ]
 }
