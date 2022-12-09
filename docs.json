@@ -1,9 +1,5 @@
 {
-    "langPath": "lang/",
+    "langPath": "lang",
     "patternPath": "patterns.json",
-    "sourceRoots": [
-        "src/main/kotlin",
-        "src/main/java"
-    ],
     "repositoryRoot": "https://github.com/Cypher121/hexbound/"
 }
