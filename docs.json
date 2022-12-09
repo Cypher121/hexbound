@@ -4,5 +4,6 @@
     "sourceRoots": [
         "src/main/kotlin",
         "src/main/java"
-    ]
+    ],
+    "repositoryRoot": "https://github.com/Cypher121/hexbound/"
 }
