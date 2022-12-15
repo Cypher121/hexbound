@@ -28,13 +28,6 @@
         "isPerWorld": false
     },
     {
-        "id": "hexbound:get_entity_item",
-        "defaultStartDir": "EAST",
-        "angleSignature": "wqaqwaq",
-        "pathToSource": "src/main/kotlin/coffee/cypher/hexbound/feature/item_patterns/action/OpGetEntityItem.kt",
-        "isPerWorld": false
-    },
-    {
         "id": "hexbound:get_stack_prop/item",
         "defaultStartDir": "WEST",
         "angleSignature": "dedqaa",
@@ -151,6 +144,27 @@
         "defaultStartDir": "SOUTH_WEST",
         "angleSignature": "wqwqwwqwqwqwwaeqaqdwdqaqe",
         "pathToSource": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/crafting/OpCreateSpiderConstruct.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:get_entity/construct",
+        "defaultStartDir": "SOUTH_EAST",
+        "angleSignature": "qqqqqdaqaawedde",
+        "pathToSource": "external:at/petrak/hexcasting/common/casting/operators/selectors/OpGetEntityAt.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:zone_entity/construct",
+        "defaultStartDir": "SOUTH_EAST",
+        "angleSignature": "qqqqqwdeddwedde",
+        "pathToSource": "external:at/petrak/hexcasting/common/casting/operators/selectors/OpGetEntitiesBy.kt",
+        "isPerWorld": false
+    },
+    {
+        "id": "hexbound:zone_entity/not_construct",
+        "defaultStartDir": "SOUTH_EAST",
+        "angleSignature": "eeeeewaqaawedde",
+        "pathToSource": "external:at/petrak/hexcasting/common/casting/operators/selectors/OpGetEntitiesBy.kt",
         "isPerWorld": false
     },
     {
