@@ -31,13 +31,13 @@ def update_version(version_name: str):
     if all(v.id != version_name for v in versions['versions']):
         versions['versions'].append(
             {
-                "id": version_name,
-                "published": iso_now(),
-                "path": version_file
+                'id': version_name,
+                'published': iso_now(),
+                'path': version_file
             }
         )
 
-    versions['versions'] = sorted(versions['versions'], key=lambda v: v.id, reverse=True)
+    versions['versions'] = sorted(versions['versions'], key=lambda v: v['id'], reverse=True)
 
     with open('versions.json', 'w+') as fh:
         json.dump(versions, fh)
