@@ -28,7 +28,7 @@ def update_version(version_name: str):
 
     version_file = f'{version_name}/docs.json'
 
-    if all(v.id != version_name for v in versions['versions']):
+    if all(v['id'] != version_name for v in versions['versions']):
         versions['versions'].append(
             {
                 'id': version_name,
