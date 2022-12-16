@@ -21,7 +21,7 @@ def update_version(version_name: str):
     if version_file not in versions['versions']:
         versions['versions'].append(version_file)
 
-    with open('versions.json', 'w') as fh:
+    with open('versions.json', 'w+') as fh:
         json.dump(versions, fh)
 
 
