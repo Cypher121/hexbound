@@ -37,7 +37,7 @@ def update_version(version_name: str):
             }
         )
 
-    versions['versions'] = sorted(versions['versions'], key=lambda v: v['id'], reverse=True)
+    versions['versions'] = sorted(versions['versions'], key=lambda v: v['published'], reverse=True)
 
     with open('versions.json', 'w+') as fh:
         json.dump(versions, fh)
