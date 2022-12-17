@@ -21,7 +21,7 @@ def get_versions_or_default():
         }
 
 
-def update_version(version_name: str):
+def update_version(version_name: str, hash: str):
     copy_tree('latest', version_name)
 
     versions = get_versions_or_default()
@@ -33,7 +33,8 @@ def update_version(version_name: str):
             {
                 'id': version_name,
                 'published': iso_now(),
-                'path': version_file
+                'path': version_file,
+                'commitHash': hash
             }
         )
 
@@ -53,9 +54,9 @@ def update_latest():
 
 if __name__ == '__main__':
     if argv[1] == 'ref':
-        update_version(argv[2].replace('refs/tags/v', ''))
+        update_version(argv[2].replace('refs/tags/v', ''), argv[3])
     elif argv[1] == 'version':
-        update_version(argv[2])
+        update_version(argv[2], argv[3])
     elif argv[1] == 'latest':
         update_latest()
     else:
