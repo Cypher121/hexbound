@@ -28,13 +28,20 @@ def update_version(version_name: str, hash: str):
 
     version_file = f'{version_name}/docs.json'
 
+    with open(version_file, 'r') as fh:
+        version_data = json.load(fh)
+    
+    version_data['commitHash'] = hash
+
+    with open(version_file, 'w') as fh:
+        json.dump(version_data, fh)
+
     if all(v['id'] != version_name for v in versions['versions']):
         versions['versions'].append(
             {
                 'id': version_name,
                 'published': iso_now(),
-                'path': version_file,
-                'commitHash': hash
+                'path': version_file
             }
         )
 
