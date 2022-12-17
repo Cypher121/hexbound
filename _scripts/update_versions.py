@@ -21,20 +21,12 @@ def get_versions_or_default():
         }
 
 
-def update_version(version_name: str, hash: str):
+def update_version(version_name: str):
     copy_tree('latest', version_name)
 
     versions = get_versions_or_default()
 
     version_file = f'{version_name}/docs.json'
-
-    with open(version_file, 'r') as fh:
-        version_data = json.load(fh)
-    
-    version_data['commitHash'] = hash
-
-    with open(version_file, 'w') as fh:
-        json.dump(version_data, fh)
 
     if all(v['id'] != version_name for v in versions['versions']):
         versions['versions'].append(
@@ -51,7 +43,15 @@ def update_version(version_name: str, hash: str):
         json.dump(versions, fh)
 
 
-def update_latest():
+def update_latest(hash: str):
+    with open('latest/docs.json', 'r') as fh:
+        version_data = json.load(fh)
+    
+    version_data['commitHash'] = hash
+
+    with open('latest/docs.json', 'w') as fh:
+        json.dump(version_data, fh)
+
     versions = get_versions_or_default()
     versions['latestPublished'] = iso_now()
 
@@ -61,10 +61,10 @@ def update_latest():
 
 if __name__ == '__main__':
     if argv[1] == 'ref':
-        update_version(argv[2].replace('refs/tags/v', ''), argv[3])
+        update_version(argv[2].replace('refs/tags/v', ''))
     elif argv[1] == 'version':
-        update_version(argv[2], argv[3])
+        update_version(argv[2])
     elif argv[1] == 'latest':
-        update_latest()
+        update_latest(argv[2])
     else:
         raise Exception(f'Unknown version type: {argv[1]}')
