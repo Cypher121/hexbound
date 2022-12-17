@@ -1,9 +1,1 @@
-{
-    "availableLangFiles": [
-        "lang/en_us.json",
-        "lang/zh_cn.json"
-    ],
-    "defaultLangFile": "lang/en_us.json",
-    "patternPath": "patterns.json",
-    "repositoryRoot": "https://github.com/Cypher121/hexbound/"
-}
+{"availableLangFiles": ["lang/en_us.json", "lang/zh_cn.json"], "defaultLangFile": "lang/en_us.json", "patternPath": "patterns.json", "repositoryRoot": "https://github.com/Cypher121/hexbound/", "commitHash": "5841c13af6450853da83d0717083d98915e7b64d"}
