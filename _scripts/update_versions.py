@@ -48,6 +48,7 @@ def update_latest(hash: str):
         version_data = json.load(fh)
     
     version_data['commitHash'] = hash
+    version_data['bookPath'] = 'book.json'
 
     with open('latest/docs.json', 'w') as fh:
         json.dump(version_data, fh)
