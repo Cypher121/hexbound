@@ -1,0 +1,324 @@
+[
+    {
+        "id": "hexbound:get_main_hand",
+        "defaultStartDir": "EAST",
+        "angleSignature": "adeq",
+        "className": "coffee.cypher.hexbound.feature.item_patterns.action.OpGetHeldItem",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/item_patterns/action/OpGetHeldItem.kt"
+        }
+    },
+    {
+        "id": "hexbound:get_off_hand",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qeda",
+        "className": "coffee.cypher.hexbound.feature.item_patterns.action.OpGetHeldItem",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/item_patterns/action/OpGetHeldItem.kt"
+        }
+    },
+    {
+        "id": "hexbound:get_inventory/stacks",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "aqwed",
+        "className": "coffee.cypher.hexbound.feature.item_patterns.action.OpGetInventoryContents",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/item_patterns/action/OpGetInventoryContents.kt"
+        }
+    },
+    {
+        "id": "hexbound:get_inventory/items",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "dewqa",
+        "className": "coffee.cypher.hexbound.feature.item_patterns.action.OpGetInventoryContents",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/item_patterns/action/OpGetInventoryContents.kt"
+        }
+    },
+    {
+        "id": "hexbound:get_stack_prop/item",
+        "defaultStartDir": "WEST",
+        "angleSignature": "dedqaa",
+        "className": "coffee.cypher.hexbound.feature.item_patterns.action.OpGetStackItem",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/item_patterns/action/OpGetStackItem.kt"
+        }
+    },
+    {
+        "id": "hexbound:get_stack_prop/size",
+        "defaultStartDir": "WEST",
+        "angleSignature": "dedqaq",
+        "className": "coffee.cypher.hexbound.feature.item_patterns.action.OpGetStackSize",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/item_patterns/action/OpGetStackSize.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/rotate",
+        "defaultStartDir": "WEST",
+        "angleSignature": "deeee",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpRotatePattern",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpRotatePattern.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/merge",
+        "defaultStartDir": "NORTH_WEST",
+        "angleSignature": "aqqqqa",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpMergePatterns",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpMergePatterns.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/head",
+        "defaultStartDir": "EAST",
+        "angleSignature": "wqqqq",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpPatternHead",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpPatternHead.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/tail",
+        "defaultStartDir": "WEST",
+        "angleSignature": "weeee",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpPatternTail",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpPatternTail.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/start_dir",
+        "defaultStartDir": "WEST",
+        "angleSignature": "qeeee",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpPatternStartDir",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpPatternStartDir.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/line_count",
+        "defaultStartDir": "WEST",
+        "angleSignature": "eqqqq",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpPatternLineCount",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpPatternLineCount.kt"
+        }
+    },
+    {
+        "id": "hexbound:colorizer/save",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "wqwawqqawddwqwede",
+        "className": "coffee.cypher.hexbound.feature.colorizer_storage.action.OpColorizerSave",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/colorizer_storage/action/OpColorizerSave.kt"
+        }
+    },
+    {
+        "id": "hexbound:colorizer/load",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "wqwawqqawddwqeqaq",
+        "className": "coffee.cypher.hexbound.feature.colorizer_storage.action.OpColorizerLoad",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/colorizer_storage/action/OpColorizerLoad.kt"
+        }
+    },
+    {
+        "id": "hexbound:colorizer/delete",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "wqwawqqawddwqwdd",
+        "className": "coffee.cypher.hexbound.feature.colorizer_storage.action.OpColorizerDelete",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/colorizer_storage/action/OpColorizerDelete.kt"
+        }
+    },
+    {
+        "id": "hexbound:construct_get_self",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaawedee",
+        "className": "coffee.cypher.hexbound.feature.construct.action.OpConstructGetSelf",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/OpConstructGetSelf.kt"
+        }
+    },
+    {
+        "id": "hexbound:give_command/pick_up",
+        "defaultStartDir": "EAST",
+        "angleSignature": "eddeawaw",
+        "className": "coffee.cypher.hexbound.feature.construct.action.command.OpGiveCommandPickUp",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt"
+        }
+    },
+    {
+        "id": "hexbound:give_command/drop_off",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaqdwdw",
+        "className": "coffee.cypher.hexbound.feature.construct.action.command.OpGiveCommandDropOff",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt"
+        }
+    },
+    {
+        "id": "hexbound:give_command/move_to",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaqwdaqqqa",
+        "className": "coffee.cypher.hexbound.feature.construct.action.command.OpGiveCommandMoveTo",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt"
+        }
+    },
+    {
+        "id": "hexbound:give_command/harvest",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaqqedwed",
+        "className": "coffee.cypher.hexbound.feature.construct.action.command.OpGiveCommandHarvest",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt"
+        }
+    },
+    {
+        "id": "hexbound:give_command/use/block",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaqdee",
+        "className": "coffee.cypher.hexbound.feature.construct.action.command.OpGiveCommandUseOnBlock",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/command/OpGiveCommand.kt"
+        }
+    },
+    {
+        "id": "hexbound:instructions/send",
+        "defaultStartDir": "EAST",
+        "angleSignature": "qaaq",
+        "className": "coffee.cypher.hexbound.feature.construct.action.instruction.OpSendInstructions",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/instruction/OpSendInstructions.kt"
+        }
+    },
+    {
+        "id": "hexbound:instructions/broadcast",
+        "defaultStartDir": "SOUTH_EAST",
+        "angleSignature": "qqaaqqqqwq",
+        "className": "coffee.cypher.hexbound.feature.construct.action.instruction.OpBroadcastInstructions",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/instruction/OpBroadcastInstructions.kt"
+        }
+    },
+    {
+        "id": "hexbound:bind_construct",
+        "defaultStartDir": "EAST",
+        "angleSignature": "wqaawddewdwewewewewew",
+        "className": "coffee.cypher.hexbound.feature.construct.action.OpBindConstruct",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/OpBindConstruct.kt"
+        }
+    },
+    {
+        "id": "hexbound:create_construct/spider",
+        "defaultStartDir": "SOUTH_WEST",
+        "angleSignature": "wqwqwwqwqwqwwaeqaqdwdqaqe",
+        "className": "coffee.cypher.hexbound.feature.construct.action.crafting.OpCreateSpiderConstruct",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/construct/action/crafting/OpCreateSpiderConstruct.kt"
+        }
+    },
+    {
+        "id": "hexbound:get_entity/construct",
+        "defaultStartDir": "SOUTH_EAST",
+        "angleSignature": "qqqqqdaqaawedde",
+        "className": "at.petrak.hexcasting.common.casting.operators.selectors.OpGetEntityAt",
+        "isPerWorld": false,
+        "source": {
+            "type": "external",
+            "jar": "hexcasting-fabric-1.19.2-0.10.3.jar",
+            "path": "at/petrak/hexcasting/common/casting/operators/selectors/OpGetEntityAt.kt"
+        }
+    },
+    {
+        "id": "hexbound:zone_entity/construct",
+        "defaultStartDir": "SOUTH_EAST",
+        "angleSignature": "qqqqqwdeddwedde",
+        "className": "at.petrak.hexcasting.common.casting.operators.selectors.OpGetEntitiesBy",
+        "isPerWorld": false,
+        "source": {
+            "type": "external",
+            "jar": "hexcasting-fabric-1.19.2-0.10.3.jar",
+            "path": "at/petrak/hexcasting/common/casting/operators/selectors/OpGetEntitiesBy.kt"
+        }
+    },
+    {
+        "id": "hexbound:zone_entity/not_construct",
+        "defaultStartDir": "SOUTH_EAST",
+        "angleSignature": "eeeeewaqaawedde",
+        "className": "at.petrak.hexcasting.common.casting.operators.selectors.OpGetEntitiesBy",
+        "isPerWorld": false,
+        "source": {
+            "type": "external",
+            "jar": "hexcasting-fabric-1.19.2-0.10.3.jar",
+            "path": "at/petrak/hexcasting/common/casting/operators/selectors/OpGetEntitiesBy.kt"
+        }
+    },
+    {
+        "id": "hexbound:set_fake_impetus_player",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "qaqdaqwqaeedewd",
+        "className": "coffee.cypher.hexbound.feature.fake_circles.action.OpSetImpetusFakePlayer",
+        "isPerWorld": true,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/fake_circles/action/OpSetImpetusFakePlayer.kt"
+        }
+    }
+]
