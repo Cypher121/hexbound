@@ -66,7 +66,7 @@
         }
     },
     {
-        "id": "hexbound:rotate_pattern",
+        "id": "hexbound:pattern/rotate",
         "defaultStartDir": "WEST",
         "angleSignature": "deeee",
         "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpRotatePattern",
@@ -77,7 +77,7 @@
         }
     },
     {
-        "id": "hexbound:merge_patterns",
+        "id": "hexbound:pattern/merge",
         "defaultStartDir": "NORTH_WEST",
         "angleSignature": "aqqqqa",
         "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpMergePatterns",
@@ -85,6 +85,50 @@
         "source": {
             "type": "local",
             "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpMergePatterns.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/head",
+        "defaultStartDir": "EAST",
+        "angleSignature": "wqqqq",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpPatternHead",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpPatternHead.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/tail",
+        "defaultStartDir": "WEST",
+        "angleSignature": "weeee",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpPatternTail",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpPatternTail.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/start_dir",
+        "defaultStartDir": "WEST",
+        "angleSignature": "qeeee",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpPatternStartDir",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpPatternStartDir.kt"
+        }
+    },
+    {
+        "id": "hexbound:pattern/line_count",
+        "defaultStartDir": "WEST",
+        "angleSignature": "eqqqq",
+        "className": "coffee.cypher.hexbound.feature.pattern_editing.action.OpPatternLineCount",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/pattern_editing/action/OpPatternLineCount.kt"
         }
     },
     {
