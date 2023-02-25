@@ -165,6 +165,17 @@
         }
     },
     {
+        "id": "hexbound:create_shield",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "eweeewe",
+        "className": "coffee.cypher.hexbound.feature.combat.shield.casting.OpCreateShield",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/combat/shield/casting/OpCreateShield.kt"
+        }
+    },
+    {
         "id": "hexbound:construct_get_self",
         "defaultStartDir": "EAST",
         "angleSignature": "qaawedee",
