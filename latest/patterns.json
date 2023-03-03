@@ -165,14 +165,25 @@
         }
     },
     {
-        "id": "hexbound:create_shield",
+        "id": "hexbound:create_shield/normal",
         "defaultStartDir": "NORTH_EAST",
         "angleSignature": "eweeewe",
-        "className": "coffee.cypher.hexbound.feature.combat.shield.casting.OpCreateShield",
+        "className": "coffee.cypher.hexbound.feature.combat.shield.OpCreateShield",
         "isPerWorld": false,
         "source": {
             "type": "local",
-            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/combat/shield/casting/OpCreateShield.kt"
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/combat/shield/OpCreateShield.kt"
+        }
+    },
+    {
+        "id": "hexbound:create_shield/glitchy",
+        "defaultStartDir": "NORTH_EAST",
+        "angleSignature": "eqdweeqdw",
+        "className": "coffee.cypher.hexbound.feature.combat.shield.OpCreateShield",
+        "isPerWorld": false,
+        "source": {
+            "type": "local",
+            "path": "src/main/kotlin/coffee/cypher/hexbound/feature/combat/shield/OpCreateShield.kt"
         }
     },
     {
