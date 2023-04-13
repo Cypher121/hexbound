@@ -1,0 +1,399 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="The Hex Book, all in one place (Hexbound Edition).">
+    <meta name="author" content="Cypher121">
+    <link rel="icon" href="icon.png">
+
+    <title>Hex Book</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <style>
+        summary { display: list-item; }
+
+        details.spell-collapsible {
+            display: inline-block;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            padding: .5em .5em 0;
+            margin-bottom: .5em;
+        }
+
+        summary.collapse-spell {
+            font-weight: bold;
+            margin: -.5em -.5em 0;
+            padding: .5em;
+        }
+
+        details.spell-collapsible[open] {
+            padding: .5em;
+        }
+
+        details[open] summary.collapse-spell {
+            border-bottom: 1px solid #aaa;
+            margin-bottom: .5em;
+        }
+
+        details .collapse-spell::before {
+            content: "Click to show spell";
+        }
+        details[open] .collapse-spell::before {
+            content: "Click to hide spell";
+        }
+        blockquote.crafting-info {
+            font-size: inherit;
+        }
+        a.permalink {
+            margin-left: 0.5em;
+        }
+        a.permalink:hover {
+            color: lightgray;
+        }
+        p {
+            margin: 0.5ex 0;
+        }
+        p.fake-li {
+            margin: 0;
+        }
+        p.fake-li::before {
+            content: "\2022";
+            margin: 1ex;
+        }
+        .linkout::before {
+            content: "Link: ";
+        }
+        p.todo-note {
+            font-style: italic;
+            color: lightgray;
+        }
+        .obfuscated {
+            filter: blur(1em);
+        }
+        .spoilered {
+            filter: blur(1ex);
+            -moz-transition: filter 0.04s linear;
+        }
+        .spoilered:hover {
+            filter: blur(0.5ex);
+        }
+        .spoilered.unspoilered {
+            filter: blur(0);
+        }
+        canvas.spell-viz {
+            --dot-color: #777f;
+            --dot-color: #777f;
+            --start-dot-color: #f009;
+            --moving-dot-color: #0fa9;
+
+            --path-color: darkgray;
+            --visited-path-color: #0c8;
+
+            --dot-scale: 0.0625;
+            --moving-dot-scale: 0.125;
+            --line-scale: 0.08333;
+            --pausetext-scale: 0.5;
+            --dark-mode: 0;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #201a20;
+                color: #ddd;
+            }
+
+            .jumbotron {
+                background-color: #323;
+            }
+
+            canvas.spell-viz {
+                /* hack */
+                --dark-mode: 1;
+            }
+        }
+
+    </style>
+    <noscript>
+        <style>
+            /* for accessibility */
+            .spoilered {
+                filter: none !important;
+            }
+
+        </style>
+    </noscript>
+    <script>
+        "use strict";
+        const speeds = [0, 0.25, 0.5, 1, 2, 4];
+        const scrollThreshold = 100;
+        const rfaQueue = [];
+        const colorCache = new Map();
+        function getColorRGB(ctx, str) {
+            if (!colorCache.has(str)) {
+                ctx.fillStyle = str;
+                ctx.clearRect(0, 0, 1, 1);
+                ctx.fillRect(0, 0, 1, 1);
+                const imgData = ctx.getImageData(0, 0, 1, 1);
+                colorCache.set(str, imgData.data);
+            }
+            return colorCache.get(str);
+        }
+        function startAngle(str) {
+            switch (str) {
+                case "east": return 0;
+                case "north_east": return 1;
+                case "north_west": return 2;
+                case "west": return 3;
+                case "south_west": return 4;
+                case "south_east": return 5;
+                default: return 0;
+            }
+        }
+        function offsetAngle(str) {
+            switch (str) {
+                case "w": return 0;
+                case "q": return 1;
+                case "a": return 2;
+                case "s": return 3;
+                case "d": return 4;
+                case "e": return 5;
+                default: return -1;
+            }
+        }
+        function initializeElem(canvas) {
+            const str = canvas.dataset.string;
+            let angle = startAngle(canvas.dataset.start);
+            const perWorld = canvas.dataset.perWorld === "True";
+
+            // build geometry
+            const points = [[0, 0]];
+            let lastPoint = points[0];
+            let minPoint = lastPoint, maxPoint = lastPoint;
+            for (const ch of "w" + str) {
+                const addAngle = offsetAngle(ch);
+                if (addAngle < 0) continue;
+                angle = (angle + addAngle) % 6;
+                const trueAngle = Math.PI / 3 * angle;
+
+                const [lx, ly] = lastPoint;
+                const newPoint = [lx + Math.cos(trueAngle), ly - Math.sin(trueAngle)];
+
+                points.push(newPoint);
+                lastPoint = newPoint;
+
+                const [mix, miy] = minPoint;
+                minPoint = [Math.min(mix, newPoint[0]), Math.min(miy, newPoint[1])];
+                const [max, may] = maxPoint;
+                maxPoint = [Math.max(max, newPoint[0]), Math.max(may, newPoint[1])];
+            }
+            const size = Math.min(canvas.width, canvas.height) * 0.8;
+            const scale = size / Math.max(3, Math.max(maxPoint[1] - minPoint[1], maxPoint[0] - minPoint[0]));
+            const center = [(minPoint[0] + maxPoint[0]) * 0.5, (minPoint[1] + maxPoint[1]) * 0.5];
+            const truePoints = points.map(p => [canvas.width * 0.5 + scale * (p[0] - center[0]), canvas.height * 0.5 + scale * (p[1] - center[1])]);
+            let uniqPoints = [];
+            l1: for (const point of truePoints) {
+                for (const pt of uniqPoints) {
+                    if (Math.abs(point[0] - pt[0]) < 0.00001 && Math.abs(point[1] - pt[1]) < 0.00001) {
+                        continue l1;
+                    }
+                }
+                uniqPoints.push(point);
+            }
+
+            // rendering code
+            const speed = 0.0025;
+            const context = canvas.getContext("2d");
+            const negaProgress = -3;
+            let progress = 0;
+            let scrollTimeout = 1e309;
+            let speedLevel = 3;
+            let speedIncrement = 0;
+            function speedScale() {
+                return speeds[speedLevel];
+            }
+
+            const style = getComputedStyle(canvas);
+            const getProp = n => style.getPropertyValue(n);
+
+            const tick = dt => {
+                scrollTimeout += dt;
+                if (canvas.offsetParent === null) return;
+
+                const strokeStyle = getProp("--path-color");
+                const strokeVisitedStyle = getProp("--visited-path-color");
+
+                const startDotStyle = getProp("--start-dot-color");
+                const dotStyle = getProp("--dot-color");
+                const movDotStyle = getProp("--moving-dot-color");
+
+                const strokeWidth = scale * +getProp("--line-scale");
+                const dotRadius = scale * +getProp("--dot-scale");
+                const movDotRadius = scale * +getProp("--moving-dot-scale");
+                const pauseScale = scale * +getProp("--pausetext-scale");
+                const bodyBg = scale * +getProp("--pausetext-scale");
+                const darkMode = +getProp("--dark-mode");
+                const bgColors = getColorRGB(context, getComputedStyle(document.body).backgroundColor);
+
+
+                if (!perWorld) {
+                    progress += speed * dt * (progress > 0 ? speedScale() : Math.sqrt(speedScale()));
+                }
+                if (progress >= truePoints.length - 1) {
+                    progress = negaProgress;
+                }
+                let ix = Math.floor(progress), frac = progress - ix, core = null, fadeColor = 0;
+                if (ix < 0) {
+                    const rawFade = 2 * progress / negaProgress - 1;
+                    fadeColor = 1 - Math.abs(rawFade);
+                    context.strokeStyle = rawFade > 0 ? strokeVisitedStyle : strokeStyle;
+                    ix = rawFade > 0 ? truePoints.length - 2 : 0;
+                    frac = +(rawFade > 0);
+                } else {
+                    context.strokeStyle = strokeVisitedStyle;
+                }
+
+                const [lx, ly] = truePoints[ix];
+                const [rx, ry] = truePoints[ix + 1];
+                core = [lx + (rx - lx) * frac, ly + (ry - ly) * frac];
+
+
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.beginPath();
+                context.lineWidth = strokeWidth;
+                context.moveTo(truePoints[0][0], truePoints[0][1]);
+                for (let i = 1; i < ix + 1; i++) {
+                    context.lineTo(truePoints[i][0], truePoints[i][1]);
+                }
+                context.lineTo(core[0], core[1]);
+                context.stroke();
+                context.beginPath();
+                context.strokeStyle = strokeStyle;
+                context.moveTo(core[0], core[1]);
+                for (let i = ix + 1; i < truePoints.length; i++) {
+                    context.lineTo(truePoints[i][0], truePoints[i][1]);
+                }
+                context.stroke();
+
+                for (let i = 0; i < uniqPoints.length; i++) {
+                    context.beginPath();
+                    context.fillStyle = (i == 0 && !perWorld) ? startDotStyle : dotStyle;
+                    const radius = (i == 0 && !perWorld) ? movDotRadius : dotRadius;
+                    context.arc(uniqPoints[i][0], uniqPoints[i][1], radius, 0, 2 * Math.PI);
+                    context.fill();
+                }
+
+                if (!perWorld) {
+                    context.beginPath();
+                    context.fillStyle = movDotStyle;
+                    context.arc(core[0], core[1], movDotRadius, 0, 2 * Math.PI);
+                    context.fill();
+                }
+                if (fadeColor) {
+                    context.fillStyle = `rgba(${bgColors[0]}, ${bgColors[1]}, ${bgColors[2]}, ${fadeColor})`;
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                if (scrollTimeout <= 2000) {
+                    context.fillStyle = `rgba(200, 200, 200, ${(2000 - scrollTimeout) / 1000})`;
+                    context.font = `${pauseScale}px sans-serif`;
+                    context.fillText(speedScale() ? speedScale() + "x" : "Paused", 0.2 * scale, canvas.height - 0.2 * scale);
+                }
+            };
+            rfaQueue.push(tick);
+
+            // scrolling input
+            if (!perWorld) {
+                canvas.addEventListener("wheel", ev => {
+                    speedIncrement += ev.deltaY;
+                    const oldSpeedLevel = speedLevel;
+                    if (speedIncrement >= scrollThreshold) {
+                        speedLevel--;
+                    } else if (speedIncrement <= -scrollThreshold) {
+                        speedLevel++;
+                    }
+                    if (oldSpeedLevel != speedLevel) {
+                        speedIncrement = 0;
+                        speedLevel = Math.max(0, Math.min(speeds.length - 1, speedLevel));
+                        scrollTimeout = 0;
+                    }
+                    ev.preventDefault();
+                });
+            }
+        }
+        function hookLoad(elem) {
+            let init = false;
+            const canvases = elem.querySelectorAll("canvas");
+            elem.addEventListener("toggle", () => {
+                if (!init) {
+                    canvases.forEach(initializeElem);
+                    init = true;
+                }
+            });
+        }
+        function hookToggle(elem) {
+            const details = Array.from(document.querySelectorAll("details." + elem.dataset.target));
+            elem.addEventListener("click", () => {
+                if (details.some(x => x.open)) {
+                    details.forEach(x => x.open = false);
+                } else {
+                    details.forEach(x => x.open = true);
+                }
+            });
+        }
+        const params = new URLSearchParams(document.location.search);
+        function hookSpoiler(elem) {
+            if (params.get("nospoiler") !== null) {
+                elem.classList.add("unspoilered");
+            } else {
+                const thunk = ev => {
+                    if (!elem.classList.contains("unspoilered")) {
+                        ev.preventDefault();
+                        ev.stopImmediatePropagation();
+                        elem.classList.add("unspoilered");
+                    }
+                    elem.removeEventListener("click", thunk);
+                };
+                elem.addEventListener("click", thunk);
+
+                if (elem instanceof HTMLAnchorElement) {
+                    const href = elem.getAttribute("href");
+                    if (href.startsWith("#")) {
+                        elem.addEventListener("click", () => document.getElementById(href.substring(1)).querySelector(".spoilered").classList.add("unspoilered"));
+                    }
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('details.spell-collapsible').forEach(hookLoad);
+            document.querySelectorAll('a.toggle-link').forEach(hookToggle);
+            document.querySelectorAll('.spoilered').forEach(hookSpoiler);
+            function tick(prevTime, time) {
+                const dt = time - prevTime;
+                for (const q of rfaQueue) {
+                    q(dt);
+                }
+                requestAnimationFrame(t => tick(time, t));
+            }
+            requestAnimationFrame(t => tick(t, t));
+        });
+
+    </script>
+
+</head>
+<body>
+<div class="container" style="margin-top: 3em;">
+    <blockquote>
+        <h1>This is the online version of the Hexbound documentation.</h1>
+        <p>Embedded images and patterns are included, but not crafting recipes or items. There's an in-game book for
+            those.</p>
+        <p>Additionally, this is built from the latest code on GitHub. It may describe <b>newer</b> features that you
+            may not necessarily have, even on the latest CurseForge version!</p>
+        <p><b>Entries which are blurred are spoilers</b>. Click to reveal them, but be aware that they may spoil endgame
+            progression. Alternatively, click <a href="?nospoiler">here</a> to get a version with all spoilers showing.
+        </p>
+    </blockquote>
+</div>
+<div class='container'><header class='jumbotron'><h1 class='book-title'>Hex Notebook</h1><p>I seem to have discovered a new method of magical arts, in which one draws patterns strange and wild onto a hexagonal grid. It fascinates me. I've decided to start a journal of my thoughts and findings.</p><p><a href='https://forum.petra-k.at/index.php'>Forum Link</a></p></header><nav><h2 id='table-of-contents' class='page-header'>Table of Contents<a href='javascript:void(0)' class='toggle-link small' data-target='toc-category'>(toggle all)</a><a href='#table-of-contents' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><details class='toc-category'><summary><a href='#basics' class=''>Getting Started</a></summary><ul><li><a href='#basics/hexbound_exists' class=''>Hexbinding</a></li></ul></details><details class='toc-category'><summary><a href='#casting' class=''>Hex Casting</a></summary><ul><li><a href='#casting/item_iotas' class=''>Item Iotas</a></li><li><a href='#casting/hexbound_mishaps' class=''>Hexbinding Mishaps</a></li><li><a href='#casting/figments' class=''>Figments</a></li></ul></details><details class='toc-category'><summary><a href='#greatwork' class='spoilered'>The Great Work</a></summary><ul><li><a href='#greatwork/impetus_figment' class='spoilered'>Impetus Figments</a></li></ul></details><details class='toc-category'><summary><a href='#interop' class=''>Cross-Mod Compatibility</a></summary><ul><li><a href='#interop/hexal_interop' class=''>Hexal-Hexbound</a></li></ul></details><details class='toc-category'><summary><a href='#patterns' class=''>Patterns</a></summary><ul><li><a href='#patterns/item_patterns' class=''>Item Patterns</a></li><li><a href='#patterns/pattern_editing' class=''>Pattern Editing</a></li></ul></details><details class='toc-category'><summary><a href='#patterns/spells' class=''>Spells</a></summary><ul><li><a href='#patterns/spells/colorizer_storage' class=''>Memorizing Pigments</a></li><li><a href='#patterns/spells/shield' class=''>Hex Shield</a></li></ul></details><details class='toc-category'><summary><a href='#patterns/great_spells' class=''>Great Spells</a></summary><ul><li><a href='#patterns/great_spells/impetus_fake_player' class=''>Bind Figment</a></li></ul></details><details class='toc-category'><summary><a href='#patterns/constructs' class=''>Constructs</a></summary><ul><li><a href='#patterns/constructs/constructs_intro' class=''>Intro to Constructs</a></li><li><a href='#patterns/constructs/executing_commands' class=''>Executing Commands</a></li><li><a href='#patterns/constructs/spider_construct' class=''>Spider Constructs</a></li><li><a href='#patterns/constructs/bind_broadcast' class=''>Binding and Broadcasting</a></li><li><a href='#patterns/constructs/selecting_constructs' class=''>Selecting Constructs</a></li></ul></details></nav><main class='book-body'><section id='basics'><h2 class='category-title page-header'>Getting Started<a href='#basics' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><p>The practitioners of this art would cast their so-called <span style='color: #b38ef3'>Hexes</span> by drawing strange patterns in the air with a <a href='#items/staff'><span style='color: #b0b'>staff</span></a>-- or craft <a href='#items/hexcasting'><span style='color: #b0b'>powerful magical items</span></a> to do the casting for them. How might I do the same?</p><div id='basics/hexbound_exists'><h3 class='entry-title page-header'>Hexbinding<a href='#basics/hexbound_exists' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>I have found evidence of a different branch of <span style='color: #b38ef3'>Hexcasting</span>. Known as <span style='color: #b38ef3'>Hexbinding</span>, this particular school uses media to create and control automata known as Constructs, manipulate items, and more. As always, I will document my findings in this journal.</p><br /></div></section><section id='casting'><h2 class='category-title page-header'>Hex Casting<a href='#casting' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><p>I've started to understand how the old masters cast their <span style='color: #b38ef3'>Hexes</span>! It's a bit complicated, but I'm sure I can figure it out. Let's see...</p><div id='casting/item_iotas'><h3 class='entry-title page-header'>Item Iotas<a href='#casting/item_iotas' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>I have discovered two additional types of iotas I can manipulate.</p><p>Item Iotas describe a singular item stripped of its properties, such as damage or enchantments.</p><p>Item Stack Iotas describe a stack of items as they might appear in my inventory, amount, custom names, enchantments, and all.</p><br /><p>It would also seem Item Stack iotas referring to Foci containing other Item Stack iotas are somewhat faulty. A limit to the depth of my thought perhaps.</p><br /></div><div id='casting/hexbound_mishaps'><h3 class='entry-title page-header'>Hexbinding Mishaps<a href='#casting/hexbound_mishaps' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>New schools of <span style='color: #b38ef3'>Hexcasting</span> bring new and exciting ways of utterly failing a <span style='color: #b38ef3'>Hex</span>. Here are some I have discovered.</p><br /><h4>Not Drawn By Construct</h4><p>The pattern drawn cannot be executed by anything except a <a href='#patterns/constructs/constructs_intro'>Construct</a>. Causes purple sparks and slows me for a few seconds.</p><br /><h4>Construct Incapable</h4><p>The pattern drawn (usually a command) requires the Construct do something it cannot, such as attacking for a utility Construct. Causes yellow sparks.</p><br /><h4>Construct Is Forbidden</h4><p>I attempted to give orders to a Construct that will not accept any from me. Causes brown sparks and pushes me away from the Construct.</p><br /><h4>No Pigment Present</h4><p>I have not internalized a Pigment yet. Causes white sparks.</p><br /><h4>Too Many Pigments</h4><p>I have already memorized too many Pigments and cannot add another. Causes red sparks.</p><br /><h4>No Pigment For Key</h4><p>I have not <a href='#patterns/spells/colorizer_storage'>memorized a Pigment</a> for the pattern I entered. Causes white sparks and causes me to lose my current Pigment.</p><br /></div><div id='casting/figments'><h3 class='entry-title page-header'>Figments<a href='#casting/figments' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>All my study shows that the act of casting a <span style='color: #b38ef3'>Hex</span> inevitably requires a living Caster exist <i>somewhere</i>. Perhaps an obvious and pointless detail: I am the one casting the <span style='color: #b38ef3'>Hex</span>, so the requirement is met, but should I discover <a href='https://gamma-delta.github.io/HexMod/#greatwork/spellcircle'>some means of independent casting</a> (or even rig a dispenser to flail a trinket around), it would lose the link and cease to function the moment I cross the portal to the Nether or elsewhere.</p><br /><p>However, I believe a specially designed web of <span style='color: #74b3f2'>media</span> could ''trick'' the <span style='color: #b38ef3'>Hex</span> into latching onto it long enough to resolve. These Figments as I've begun calling them, would either be severely limited in their abilities, as Constructs are, or would require something much more intricate to hold their hand through the <span style='color: #b38ef3'>Hex</span>, so to speak.<br />Moreover, Figments are not entirely self-aware: Mind's Reflection simply returns <a href='https://gamma-delta.github.io/HexMod/#casting/influences'><span style='color: #8d6acc'>Null</span></a>, while <a href='https://gamma-delta.github.io/HexMod/#patterns/spells/sentinels'>Sentinels</a> and <span style='color: #8d6acc'><a href='https://gamma-delta.github.io/HexMod/#items/pigments'>Pigments</a></span> are unreliable.</p><br /></div></section><section id='greatwork'><div class='spoilered'><h2 class='category-title page-header'>The Great Work<a href='#greatwork' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><p>I have seen... so much. I have... experienced... annihilation and deconstruction and reconstruction. I have seen the atoms of the world screaming as they were inverted and subverted and demoted to energy. I have seen I have seen I have s<span class='obfuscated'>get stick bugged lmao</span></p></div><div id='greatwork/impetus_figment'><div class='spoilered'><h3 class='entry-title page-header'>Impetus Figments<a href='#greatwork/impetus_figment' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>Now that I possess the means to contain a mind, I have revisited my notes on <a href='#patterns/great_spells/impetus_fake_player'>Bind Figment</a> and confirmed that a <a href='https://gamma-delta.github.io/HexMod/#greatwork/impetuses'>Cleric Impetus</a> would be the perfect vessel for it. The Impetus must be bound to a <span style='color: #b38ef3'>Hexcaster</span> as <i>enlightened</i> as I am; no other mind would allow a piece of itself to be unraveled like this.</p><p>Not yet. THEY WILL. In time.</p><br /><p>Furthermore, if the Impetus can connect to its bound caster, that connection will take priority over the Figment.</p><p>A thought with no mind bound to a lattice every thought wrapped and screaming it is not itself it always made sense it will never make sense <span class='obfuscated'>hello penguin</span></p><p>Ten <span style='color: #74b3f2'>Charged Amethyst</span> for the spell.</p><br /></div></div></section><section id='interop'><h2 class='category-title page-header'>Cross-Mod Compatibility<a href='#interop' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><p>It appears I have installed some mods Hexcasting interoperates with! I've detailed them here.</p><div id='interop/hexal_interop'><h3 class='entry-title page-header'>Hexal-Hexbound<a href='#interop/hexal_interop' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>It appears some of the <span style='color: #b38ef3'>Hexcasting</span> disciplines I've encountered can operate together.</p><p> First, I've discovered that <a href='#casting/item_iotas'>Item Iotas</a>, as created by the likes of <a href='#patterns/item_patterns@hexbound:get_main_hand'>Duelist's Purification</a>, and Item Type Iotas, as created by <a href='https://talia-12.github.io/Hexal/#patterns/types@hexal:type/entity'>Physician's Purification</a>, are near-identical! Comparisons between them or their types should therefore work as expected.</p><br /><p>The second and, perhaps, even more important discovery is the ability of <a href='#patterns/constructs/constructs_intro'>Constructs</a> to maintain <a href='https://talia-12.github.io/Hexal/#patterns/spells/links'>Links</a>. This will allow me to send iotas between Wisps and Constructs, or even Constructs and myself! The possibilities are well and truly endless.</p><br /></div></section><section id='patterns'><h2 class='category-title page-header'>Patterns<a href='#patterns' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><p>A list of all the patterns I've discovered, as well as what they do.</p><div id='patterns/item_patterns'><h3 class='entry-title page-header'>Item Patterns<a href='#patterns/item_patterns' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><div id='patterns/item_patterns@hexbound:get_stack_prop/item'><h4 class='pattern-title'>Logistician's Purification (item stack → item)<a href='#patterns/item_patterns@hexbound:get_stack_prop/item' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='dedqaa' data-start='west' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: dedqaa</canvas></details><p>Transforms the <a href='#casting/item_iotas'>Item Stack</a> at the top of the stack into its Item.</p></div><br /><div id='patterns/item_patterns@hexbound:get_stack_prop/size'><h4 class='pattern-title'>Treasurer's Purification (item stack → num)<a href='#patterns/item_patterns@hexbound:get_stack_prop/size' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='dedqaq' data-start='west' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: dedqaq</canvas></details><p>Transforms the Item Stack at the top of the stack into its size.</p></div><br /><div id='patterns/item_patterns@hexbound:get_main_hand'><h4 class='pattern-title'>Duelist's Purification (entity → item stack)<a href='#patterns/item_patterns@hexbound:get_main_hand' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='adeq' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: adeq</canvas></details><p>Transforms the entity at the top of the stack into the Item Stack in its main hand. Also works on Item Frames and dropped items.</p></div><br /><div id='patterns/item_patterns@hexbound:get_off_hand'><h4 class='pattern-title'>Shieldbearer's Purification (entity → item stack)<a href='#patterns/item_patterns@hexbound:get_off_hand' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qeda' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qeda</canvas></details><p>Transforms the entity at the top of the stack into the Item Stack in its off hand.</p></div><br /><div id='patterns/item_patterns@hexbound:get_inventory/stacks'><h4 class='pattern-title'>Hoarder's Distillation (vector, vector → list)<a href='#patterns/item_patterns@hexbound:get_inventory/stacks' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='aqwed' data-start='north_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: aqwed</canvas></details><p>Removes two vectors from the stack representing position and side. Returns a list of Item Stacks in the block at the given position accessible from the given side (or all if second vector is zero).</p></div><br /><div id='patterns/item_patterns@hexbound:get_inventory/items'><h4 class='pattern-title'>Collector's Distillation (vector, vector → list)<a href='#patterns/item_patterns@hexbound:get_inventory/items' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='dewqa' data-start='north_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: dewqa</canvas></details><p>Removes two vectors from the stack representing position and side. Returns a list of Items in the block at the given position accessible from the given side (or all if second vector is zero).</p></div><br /></div><div id='patterns/pattern_editing'><h3 class='entry-title page-header'>Pattern Editing<a href='#patterns/pattern_editing' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>Some patterns I found seem to allow editing other patterns in multiple ways, even producing patterns that would ordinarily be impossible to draw.</p><p>Exciting as that may sound, anything possible I could just draw myself, and any impossible pattern is very unlikely to produce valuable results.<br />Some look pretty good on a <a href='https://gamma-delta.github.io/HexMod/#items/scroll'>Scroll</a> though, so not entirely pointless!</p><br /><div id='patterns/pattern_editing@hexbound:pattern/line_count'><h4 class='pattern-title'>Fragment's Purification (pattern → num)<a href='#patterns/pattern_editing@hexbound:pattern/line_count' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='eqqqq' data-start='west' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: eqqqq</canvas></details><p>Removes a pattern from the stack and returns the number of strokes the removed pattern is composed of.</p></div><br /><div id='patterns/pattern_editing@hexbound:pattern/start_dir'><h4 class='pattern-title'>Winding Purification (pattern → num)<a href='#patterns/pattern_editing@hexbound:pattern/start_dir' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qeeee' data-start='west' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qeeee</canvas></details><p>Removes a pattern from the stack and returns a number from 0 to 5 representing the pattern's starting direction. The returned number will be 0 for north-east, 1 for east, and continue to increase clockwise.</p></div><br /><div id='patterns/pattern_editing@hexbound:pattern/rotate'><h4 class='pattern-title'>Revolving Distillation (pattern, num → pattern)<a href='#patterns/pattern_editing@hexbound:pattern/rotate' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='deeee' data-start='west' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: deeee</canvas></details><p>Removes a pattern and an integer from the stack and rotates the pattern the number of times given by the integer. Positive numbers rotate clockwise, while negative rotate counter-clockwise.</p></div><br /><div id='patterns/pattern_editing@hexbound:pattern/merge'><h4 class='pattern-title'>Painter's Distillation (pattern, pattern → pattern)<a href='#patterns/pattern_editing@hexbound:pattern/merge' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='aqqqqa' data-start='north_west' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: aqqqqa</canvas></details><p>Removes two patterns and merges them, as if first stroke of the second was drawn from the last point of the first. It appears if the result is longer than 128 strokes, its end will be lost entirely.</p></div><br /><div id='patterns/pattern_editing@hexbound:pattern/head'><h4 class='pattern-title'>Starting Distillation (pattern, num → pattern)<a href='#patterns/pattern_editing@hexbound:pattern/head' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='wqqqq' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: wqqqq</canvas></details><p>Removes a pattern and a number N from the stack. N must be between 1 and the number of strokes in the removed pattern. Returns a pattern composed of the first N strokes of the removed pattern, preserving the original pattern's direction.</p></div><br /><div id='patterns/pattern_editing@hexbound:pattern/tail'><h4 class='pattern-title'>Ending Distillation (pattern, num → pattern)<a href='#patterns/pattern_editing@hexbound:pattern/tail' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='weeee' data-start='west' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: weeee</canvas></details><p>Removes a pattern and a number from the stack. Behaves exactly as Starting Distillation but takes the last strokes of the pattern instead of the first.</p></div><br /></div></section><section id='patterns/spells'><h2 class='category-title page-header'>Spells<a href='#patterns/spells' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><p>Patterns and actions that perform a magical effect on the world.</p><div id='patterns/spells/colorizer_storage'><h3 class='entry-title page-header'>Memorizing Pigments<a href='#patterns/spells/colorizer_storage' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>The patterns in this chapter allow me to memorize <span style='color: #8d6acc'><a href='https://gamma-delta.github.io/HexMod/#items/pigments'>Pigments</a></span> I have already Internalized.</p><p>Using these patterns associates a Pigment with a pattern of my choosing in my mind, allowing me to revert to it whenever I please. I will never run out of eggs again!</p><br /><div id='patterns/spells/colorizer_storage@hexbound:colorizer/save'><h4 class='pattern-title'>Memorize Pigment (pattern →)<a href='#patterns/spells/colorizer_storage@hexbound:colorizer/save' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='wqwawqqawddwqwede' data-start='north_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: wqwawqqawddwqwede</canvas></details><p>Removes a pattern from the stack and associates my current Pigment with that pattern.</p></div><br /><div id='patterns/spells/colorizer_storage@hexbound:colorizer/load'><h4 class='pattern-title'>Recall Pigment (pattern →)<a href='#patterns/spells/colorizer_storage@hexbound:colorizer/load' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='wqwawqqawddwqeqaq' data-start='north_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: wqwawqqawddwqeqaq</canvas></details><p>Removes a pattern from the stack and sets my current Pigment to the one I have associated with that pattern</p></div><br /><div id='patterns/spells/colorizer_storage@hexbound:colorizer/delete'><h4 class='pattern-title'>Forget Pigment (pattern →)<a href='#patterns/spells/colorizer_storage@hexbound:colorizer/delete' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='wqwawqqawddwqwdd' data-start='north_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: wqwawqqawddwqwdd</canvas></details><p>Removes a pattern from the stack, and forgets the Pigment I have associated with that pattern.</p></div><br /></div><div id='patterns/spells/shield'><h3 class='entry-title page-header'>Hex Shield<a href='#patterns/spells/shield' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>In my search for geodes and other travels I've discovered that getting shot full of arrows significantly interferes with my ability to focus on my <span style='color: #b38ef3'>Hexes</span>.</p><p>The patterns detailed in this entry will let me avoid using unwieldy and fragile shields, replacing them with a manifestation of <span style='color: #74b3f2'>media</span>.</p><br /><p>These manifestations, or <span style='color: #b38ef3'>Hex Shields</span>, will block most projectiles from going through, but only in the direction opposite its facing,allowing me to fire a bow or throw potions with no fear of reprisal. Curiously, this extends to <a href='https://gamma-delta.github.io/HexMod/#patterns/basics@hexcasting:raycast/entity'>Scout's Distillation</a>, which will go through the shield only if it's facing in the same direction.</p><p>It appears I cannot have more than 10 active Hex Shields at once.</p><br /><div id='patterns/spells/shield@hexbound:colorizer/normal'><h4 class='pattern-title'>Hex Shield (vec, vec, num →)<a href='#patterns/spells/shield@hexbound:colorizer/normal' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='eweeewe' data-start='north_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: eweeewe</canvas></details><p>Removes a position vector, facing vector, and a positive number from the stack, creating a Hex Shield with the given position and facing, which will last for the given number of seconds.<br />Costs 2 <span style='color: #74b3f2'>Amethyst Dust</span> per second of duration.</p></div><br /><div id='patterns/spells/shield@hexbound:create_shield/glitchy'><h4 class='pattern-title'>Unstable Hex Shield (vec, vec, num →)<a href='#patterns/spells/shield@hexbound:create_shield/glitchy' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='eqdweeqdw' data-start='north_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: eqdweeqdw</canvas></details><p>Creates an unstable Hex Shield, which will occasionally distort. The effect appears purely visual.</p></div><br /></div></section><section id='patterns/great_spells'><h2 class='category-title page-header'>Great Spells<a href='#patterns/great_spells' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><p>The spells catalogued here are purported to be of legendary difficulty and power. They seem to have been recorded only sparsely (for good reason, the texts claim). It's probably just the hogwash of extinct traditionalists, though-- a pattern's a pattern. What could possibly go wrong?</p><div id='patterns/great_spells/impetus_fake_player'><h3 class='entry-title page-header'>Bind Figment<a href='#patterns/great_spells/impetus_fake_player' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><div id='patterns/great_spells/impetus_fake_player@hexbound:set_fake_impetus_player'><h4 class='pattern-title'>Bind Figment (vector →)<a href='#patterns/great_spells/impetus_fake_player@hexbound:set_fake_impetus_player' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qaqdaqwqaeedewd' data-start='north_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qaqdaqwqaeedewd</canvas></details><p>Removes a vector from the stack and binds a <a href='#casting/figments'>Figment</a> to the block at the position represented by the vector.<br />I can't tell what the <a href='#greatwork/impetus_figment'>target</a> is supposed to be though.</p></div><br /></div></section><section id='patterns/constructs'><h2 class='category-title page-header'>Constructs<a href='#patterns/constructs' class='permalink small'><i class='bi bi-link-45deg'></i></a></h2><p>The patterns in this chapter allow me to manipulate Constructs: living machines capable of carrying out my orders and even casting some limited <span style='color: #b38ef3'>Hexes</span> on their own.</p><div id='patterns/constructs/constructs_intro'><h3 class='entry-title page-header'>Intro to Constructs<a href='#patterns/constructs/constructs_intro' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>Constructs are a type of machine used by <span style='color: #b38ef3'>Hexbinders</span> in ages past, and, following meticulous study of surviving blueprints, are now at my disposal.</p><br /><p>What puts Constructs apart from simpler machines such as the Golems employed by villages of this world is their ability to process <span style='color: #b38ef3'>Hexes</span> and use special patterns to interpret <span style='color: #b38ef3'>Hexes</span> as physical actions to perform. While the limitations are many, these <a href='#patterns/constructs/executing_commands'>''commands''</a> allow me to encode as Construct instructions a variety of tasks I'd personally find too mundane or dangerous (unless I find myself getting attached to these inanimate objects).</p><br /><p>First, the limitations:<br /></p><p class='fake-li'>Constructs are too sensitive to use their own <span style='color: #74b3f2'>media</span> for casting <span style='color: #b38ef3'>Hexes</span>. It should be assumed they do not possess any <span style='color: #74b3f2'>media</span> to spend.</p><p class='fake-li'>Most patterns, especially Spells, directly affecting the outside world simply cannot be processed by their limited pseudo-minds.</p><p class='fake-li'>Said pseudo-minds behave as any other <a href='#casting/figments'>Figment</a>: <a href='https://gamma-delta.github.io/HexMod/#patterns/basics@hexcasting:get_caster'>Mind's Reflection</a> will push <span style='color: #8d6acc'><a href='https://gamma-delta.github.io/HexMod/#casting/influences'>Null</a></span>, <a href='https://gamma-delta.github.io/HexMod/#items/pigments'>Pigments</a> and <a href='https://gamma-delta.github.io/HexMod/#patterns/spells/sentinels'>Sentinels</a> will not function.</p><br /><p>Now, for some details about the casting mechanism:<br /></p><p class='fake-li'>Construct instructions are a list of iotas and are executed immediately after each other, not unlike those contained within <a href='https://gamma-delta.github.io/HexMod/#items/hexcasting'>Casting Items</a>.</p><p class='fake-li'>Constructs start new instructions with an empty <a href='https://gamma-delta.github.io/HexMod/#casting/stack'>stack</a> and <a href='https://gamma-delta.github.io/HexMod/#patterns/readwrite@hexcasting:local'>Ravenmind</a>.</p><p class='fake-li'>Encountering a Mishap or an error in executing the command, cancels both the execution and any issued command, as well as clear the stack and Ravenmind.</p><br /><div id='patterns/constructs/constructs_intro@hexbound:instructions/send'><h4 class='pattern-title'>Send Instructions (entity, [pattern] →)<a href='#patterns/constructs/constructs_intro@hexbound:instructions/send' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qaaq' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qaaq</canvas></details><p>Some basic patterns to close off the introduction. Remove a reference to a Construct and a list of patterns from the stack and send the list as instructions to the Construct.</p></div><br /><div id='patterns/constructs/constructs_intro@hexbound:construct_get_self'><h4 class='pattern-title'>Automaton's Reflection (→ entity)<a href='#patterns/constructs/constructs_intro@hexbound:construct_get_self' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qaawedee' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qaawedee</canvas></details><p>If executed by a Construct, puts a reference to it on the stack. Otherwise, causes a <a href='https://gamma-delta.github.io/HexMod/#casting/mishaps'>Mishap</a>. Should be used instead of <a href='https://gamma-delta.github.io/HexMod/#patterns/basics@hexcasting:get_caster'>Mind's Reflection</a> for <span style='color: #b38ef3'>Hexes</span> executed by Constructs.</p></div><br /></div><div id='patterns/constructs/executing_commands'><h3 class='entry-title page-header'>Executing Commands<a href='#patterns/constructs/executing_commands' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>The core component of any <span style='color: #b38ef3'>Hex</span> executed by a Construct will be its commands, however there is an issue that needs to be addressed first. Construct instructions, like <a href='https://gamma-delta.github.io/HexMod/#patterns/meta'>any <span style='color: #b38ef3'>Hex</span></a> packaged into a list, execute instantly after each other. While normally not an issue, this causes multiple commands issued in a row to replace each other, not giving even the shortest ones a moment to be executed.</p><br /><p>The solution lies in the last argument to any command pattern. Once the command has finished, the construct will execute the list passed to it next. Stack and <a href='https://gamma-delta.github.io/HexMod/#patterns/readwrite@hexcasting:local'>Ravenmind</a> remain intact between these executions, and they can be chained to execute whole sequences of commands. However, each command will bring the spell closer to its execution limit, like <a href='https://gamma-delta.github.io/HexMod/#patterns/meta@hexcasting:eval'>Hermes' Gambit</a> would.</p><br /><p>Finally, a few notes on evaluating commands:<br /></p><p class='fake-li'>Commands can only be evaluated by a Construct. Doing so myself will cause a <a href='https://gamma-delta.github.io/HexMod/#casting/mishaps'>Mishap</a> to occur.</p><p class='fake-li'>Some commands require the Construct be able to perform certain actions like picking up items or harvesting crops. </p><p class='fake-li'>Should I, eventually, discover a Construct incapable of such actions, evaluating such a command will cause a Mishap.                      </p><p class='fake-li'>Some commands require the target be directly next to the Construct. I can expect about two blocks of leeway within which the Construct can figure the details out.</p><br /><p>Should a Mishap or a command error occur, I can examine the Construct by using a <a href='https://gamma-delta.github.io/HexMod/#items/lens'>Scrying Lens</a> on it while sneaking to find the issue.</p><p>Now, for the commands themselves.</p><br /><div id='patterns/constructs/executing_commands@hexbound:give_command/move_to'><h4 class='pattern-title'>Command: Move To Position (vector, [pattern] →)<a href='#patterns/constructs/executing_commands@hexbound:give_command/move_to' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qaaqwdaqqqa' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qaaqwdaqqqa</canvas></details><p>Removes a vector from the stack and instructs the Construct to go to the position represented by that vector. The position must be within 32 blocks of the Construct.</p></div><br /><div id='patterns/constructs/executing_commands@hexbound:give_command/pick_up'><h4 class='pattern-title'>Command: Pick Up Item (entity, [pattern] →)<a href='#patterns/constructs/executing_commands@hexbound:give_command/pick_up' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='eddeawaw' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: eddeawaw</canvas></details><p>Removes an entity representing a dropped item from the stack and instructs the Construct to pick it up. The item must be next to the Construct, the construct must be able to pick items up and not be carrying one already.</p></div><br /><div id='patterns/constructs/executing_commands@hexbound:give_command/drop_off'><h4 class='pattern-title'>Command: Drop Item ([pattern] →)<a href='#patterns/constructs/executing_commands@hexbound:give_command/drop_off' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qaaqdwdw' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qaaqdwdw</canvas></details><p>Instructs the Construct to drop the item it is currently carrying. The construct must be able carrying an item.</p></div><br /><div id='patterns/constructs/executing_commands@hexbound:give_command/harvest'><h4 class='pattern-title'>Command: Harvest (vector, [pattern] →)<a href='#patterns/constructs/executing_commands@hexbound:give_command/harvest' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qaaqqedwed' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qaaqqedwed</canvas></details><p>Removes a vector from the stack and instructs the Construct to harvest crops or berries at the position represented by that vector. If harvesting the block destroys it, it will be replanted by the Construct. The position must be next to the Construct, and the Construct must be capable of interacting with the world.</p></div><br /><div id='patterns/constructs/executing_commands@hexbound:give_command/use/block'><h4 class='pattern-title'>Command: Use On Block (vector, vector, [pattern] →)<a href='#patterns/constructs/executing_commands@hexbound:give_command/use/block' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qaaqdee' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qaaqdee</canvas></details><p>Removes two vectors from the stack and instructs the Construct to use the currently held item, if any, on the block represented by the first vector.</p></div><br /><p>If the second vector is not zero, the block is used from the side indicated by it. If it is zero, it will be used from the side closest to the Construct. The position must be next to the Construct, the Construct must be capable of carrying items, and interacting with the world.</p><br /></div><div id='patterns/constructs/spider_construct'><h3 class='entry-title page-header'>Spider Constructs<a href='#patterns/constructs/spider_construct' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>After careful study, experimentation, and filling in both figurative and literal holes in what blueprints I could find, I believe I'm ready to create a Construct of my own.</p><p>Spider Constructs, as I've taken to calling them, are small, but nimble assistants capable of interacting with their surroundings, and carrying items.</p><br /><p>One of the blueprints contained an alternate design for this Construct, which I replicated as best I could. The two designs can be switched by using an Iron Block or Amethyst Block on the Construct while sneaking or, should I find the Spider form not to my taste, by enabling a form of perception filter in configuration files to make all Constructs appear to me as their alternate design.</p><br /><h4>Spider Construct Core</h4><blockquote class='crafting-info'>Depicted in the book: The crafting recipe for the <code>Spider Construct Core</code>.</blockquote><p>The first of the three components required to create this Construct is the Core, a composite of the lenses, motivators, and inert <span style='color: #74b3f2'>media</span> required for the Construct's base form.</p><br /><h4>Spider Construct Battery</h4><blockquote class='crafting-info'>Depicted in the book: The crafting recipe for the <code>Spider Construct Battery</code>.</blockquote><p>The battery is the second component. While already made of a fair amount of <span style='color: #74b3f2'>media</span>, it will have to be amplified further. Standard usage of <a href='https://gamma-delta.github.io/HexMod/#patterns/spells/hexcasting@hexcasting:recharge'>Recharge</a> will do, and I will be able to see the amount of <span style='color: #74b3f2'>Amethyst Dust</span> required on the battery itself.</p><br /><p>Some notes on the final component. The evidence I found clearly shows it is meant to be created artificially, but is not detailed enough to do so.<br />Fortunately, I managed to work a replacement into the process: a living Allay. A creature well-attuned to <span style='color: #74b3f2'>media</span> and already capable of carrying items makes this process almost too easy.</p><p>Sometimes I wonder if the Allay's fate should concern me more than a passing thought.</p><br /><div id='patterns/constructs/spider_construct@hexbound:create_construct/spider'><h4 class='pattern-title'>Create Spider Construct (entity, entity, entity →)<a href='#patterns/constructs/spider_construct@hexbound:create_construct/spider' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='wqwqwwqwqwqwwaeqaqdwdqaqe' data-start='south_west' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: wqwqwwqwqwqwwaeqaqdwdqaqe</canvas></details><p>The inputs represent, starting from deepest on the stack, the Allay, a dropped Core, and a dropped fully-charged Battery. The items are consumed, and the Allay is converted into a Construct.</p></div><br /></div><div id='patterns/constructs/bind_broadcast'><h3 class='entry-title page-header'>Binding and Broadcasting<a href='#patterns/constructs/bind_broadcast' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><p>I have run into several problems issuing orders to my Constructs: controlling several of them requires I pass orders to each individually, it is quite challenging to send order to only some of the Constructs in an area, and, finally, it occurred to me other <span style='color: #b38ef3'>Hexcasters</span> can order my Constructs to do anything they please!</p><br /><h4>Construct Broadcaster</h4><blockquote class='crafting-info'>Depicted in the book: The crafting recipe for the <code>Construct Broadcaster</code>.</blockquote><p>The Construct Broadcaster is a small structure capable of broadcasting my orders 16 blocks around itself, solving the first two of my issues.</p><br /><div id='patterns/constructs/bind_broadcast@hexbound:instructions/broadcast'><h4 class='pattern-title'>Broadcast Instructions (vector, [pattern] →)<a href='#patterns/constructs/bind_broadcast@hexbound:instructions/broadcast' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qqaaqqqqwq' data-start='south_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qqaaqqqqwq</canvas></details><p>Removes a vector and a list of patterns. Broadcasts the list as instructions through the Broadcaster located at the indicated position.</p></div><br /><p>Broadcasting orders should save me from a few headaches in the long run, even if the range is still limited. However that is not all: a <a href='https://gamma-delta.github.io/HexMod/#items/slate'>Slate</a> containing a pattern can be placed in front of the Broadcaster, associating the instructions sent through it with that pattern.</p><p>To make use of that association, a Construct must be bound to a pattern.</p><br /><div id='patterns/constructs/bind_broadcast@hexbound:bind_construct'><h4 class='pattern-title'>Artificer's Gambit (pattern | entity | null →)<a href='#patterns/constructs/bind_broadcast@hexbound:bind_construct' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='wqaawddewdwewewewewew' data-start='east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: wqaawddewdwewewewewew</canvas></details><p>Removes a reference to a player, a pattern, or <span style='color: #8d6acc'><a href='https://gamma-delta.github.io/HexMod/#casting/influences'>Null</a></span> from the stack, and binds the Construct to it.</p></div><br /><p>If bound to a pattern, the Construct will ignore broadcast orders (but not direct orders!) unless they are associated with the same pattern.</p><p>If bound to a player, the Construct will refuse orders, direct or broadcast, from anyone other than that player.</p><p>Finally, passing <span style='color: #8d6acc'><a href='https://gamma-delta.github.io/HexMod/#casting/influences'>Null</a></span> removes both the pattern and the player the Construct is bound to.</p><br /></div><div id='patterns/constructs/selecting_constructs'><h3 class='entry-title page-header'>Selecting Constructs<a href='#patterns/constructs/selecting_constructs' class='permalink small'><i class='bi bi-link-45deg'></i></a></h3><div id='patterns/constructs/selecting_constructs@hexbound:get_entity/construct'><h4 class='pattern-title'>Entity Purification: Construct (vector → entity or null)<a href='#patterns/constructs/selecting_constructs@hexbound:get_entity/construct' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qqqqqdaqaawedde' data-start='south_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qqqqqdaqaawedde</canvas></details><p>Transform the position on the stack into the Construct at that location (or <a href='#casting/influences'><span style='color: #8d6acc'>Null</span></a> if there isn't one).</p></div><br /><div id='patterns/constructs/selecting_constructs@hexbound:zone_entity/construct'><h4 class='pattern-title'>Zone Distillation: Construct (vector, number → list)<a href='#patterns/constructs/selecting_constructs@hexbound:zone_entity/construct' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='qqqqqwdeddwedde' data-start='south_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: qqqqqwdeddwedde</canvas></details><p>Take a position and maximum distance on the stack, and combine them into a list of Constructs near the position.</p></div><br /><div id='patterns/constructs/selecting_constructs@hexbound:zone_entity/not_construct'><h4 class='pattern-title'>Zone Distillation: Non-Construct (vector, number → list)<a href='#patterns/constructs/selecting_constructs@hexbound:zone_entity/not_construct' class='permalink small'><i class='bi bi-link-45deg'></i></a></h4><details class='spell-collapsible'><summary class='collapse-spell'></summary><canvas class='spell-viz' width=216 height=216 data-string='eeeeewaqaawedde' data-start='south_east' data-per-world=False>Your browser does not support visualizing patterns. Pattern code: eeeeewaqaawedde</canvas></details><p>Take a position and maximum distance on the stack, and combine them into a list of non-Construct entities near the position.</p></div><br /></div></section></main></div>
+</body>
+</html>

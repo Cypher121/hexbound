@@ -1,0 +1,1 @@
+{"availableLangFiles": ["lang/en_us.json", "lang/zh_cn.json"], "defaultLangFile": "lang/en_us.json", "patternPath": "patterns.json", "book": {"webPath": "index.html", "dumpPath": "book.json"}, "repositoryRoot": "https://github.com/Cypher121/hexbound/", "commitHash": "d3ccb1abc1c9cbf906a18fbc2d1bb2faca0a7fdb", "bookPath": "book.json"}
