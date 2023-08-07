@@ -4,7 +4,6 @@
             no_construct: "%s只能由组构体执行",
             construct_forbidden: "%1$s只会从%2$s处接受命令",
             bad_block: {
-                stored_impetus: "一个绑定至在线玩家的牧师促动石",
                 construct_broadcaster: "一个组构体广播台"
             },
             invalid_value: {
@@ -29,13 +28,8 @@
                 storage_full: "已存储过多染色剂"
             },
             disallowed_construct: "%s已被禁用于组构体",
-            target_not_enlightened: "%s还未被启迪"
         },
-        "iota.hexbound:": {
-            item: "物品",
-            item_stack: "物品组"
-        },
-        "spell.hexbound:": {
+        "action.hexbound:": {
             "pigment/": {
                 "save": "记忆染色剂",
                 "load": "回想染色剂",
@@ -45,7 +39,6 @@
                 "normal": "咒术护盾",
                 "glitchy": "不稳定咒术护盾"
             },
-            set_fake_impetus_player: "绑定虚意识",
             "pattern/": {
                 rotate: "旋转之馏化",
                 merge: "画家之馏化",
@@ -69,16 +62,6 @@
                 send: "发送指令",
                 broadcast: "广播指令"
             },
-            get_main_hand: "决斗士之纯化",
-            get_off_hand: "持盾士之纯化",
-            "get_inventory/": {
-                stacks: "囤积者之馏化",
-                items: "收集者之馏化"
-            },
-            "get_stack_prop/": {
-                "size": "司库之纯化",
-                "item": "后勤员之纯化"
-            },
             "create_construct/": {
                 spider: "构建蛛形组构体"
             },
@@ -86,14 +69,14 @@
             "zone_entity/construct": "区域之馏化：组构体",
             "zone_entity/not_construct": "区域之馏化：非组构体"
         },
-        "spell.book.hexbound:": {
+        "action.book.hexbound:": {
             "get_entity/construct": "实体之纯化：组构体",
             "zone_entity/construct": "区域之馏化：组构体",
             "zone_entity/not_construct": "区域之馏化：非组构体",
-            "get_off_hand": "持盾士之纯化"
         }
     },
     hexbound: {
+        item_group: "咒法组构学",
         vector_format: "(%s, %s, %s)",
         stack: {
             format: "%dx %s",
@@ -144,8 +127,7 @@
                 already_has_item: "组构体已持有%s",
                 unknown_error: "发生未知错误（很有可能是Bug！）：%s"
             }
-        },
-        "impetus.fake_enabled": "内含一个虚意识"
+        }
     },
     entity: {
         hexbound: {
@@ -180,25 +162,6 @@
 |                 我也会像之前的研究一样，在这本笔记里记录我的发现。"
         },
         casting: {
-            figments: {
-                title: "虚意识",
-                "1": "我之前对相关学说的所有研究都表明，$(hex)咒术$()的施放必须要有一个存在于$(o)世界$()上的、实在的施法者。\
-|                     显然，之前所有的$(hex)咒术$()都是由我施放的，满足上述要求。但就算\
-|                     最终找到了$(l:hexcasting:greatwork/spellcircle)某些独立于施法者的施法方式$()（或者改装一下发射器让它能甩动缀品说不定也行），\
-|                     它们也会在我跨过前往其他维度的传送门时断开连接并停止工作。",
-                "2": "然而，我一直坚信存在一种设计精妙的$(media)媒质$()网络，它能“骗过”$(hex)咒术$()，并使其锁存在网络中直至施放完毕。\
-|                     我叫这些网络“虚意识”。它们要么在功能上有很多限制（如组构体），要么需要\
-|                     有更为精妙的外界事物领着它们施放$(hex)咒术$()（大致是这样）。$(br)\
-|                     此外，虚意识并没有自我意识：意识之精思只会返回 $(l:hexcasting:casting/influences)$(thing)Null$()，\
-|                     $(l:hexcasting:patterns/spells/sentinels)哨卫$()还有$(thing)$(l:hexcasting:items/pigments)染色剂$()则不会工作。"
-            },
-            item_iotas: {
-                title: "物品 Iotas",
-                "1": "我发现了可供操控的两种全新的 iota 类型。$(br2)\
-|                     物品 iota 代表一个不包含额外属性的物品，如耐久度和魔咒就不包含在内。$(br2)\
-|                     物品组 iota 代表一组任意个物品，包含物品数量、名称、魔咒等，并以其在物品栏时的格式表现。",
-                "2": "但似乎代表着存有物品组 iota 的核心的物品组 iota 会出些错误。看来我自己的意识和思维深度也有些限制。"
-            },
             hexbound_mishaps: {
                 title: "咒法组构学事故",
                 "1": "$(hex)咒法学$()的全新研究方向也带来了振奋人心的全新施放$(hex)咒术$()失败的方式。以下是我目前发现的几种。",
@@ -232,20 +195,11 @@
                 }
             }
         },
-        "greatwork.impetus_figment": {
-            title: "促动石用虚意识",
-            "1": "如今我已有控制意识的能力，我又读了一遍有关$(l:hexbound:patterns/great_spells/impetus_fake_player)绑定虚意识$()的笔记，并确认了$(l:hexcasting:greatwork/impetuses)牧师促动石$()是虚意识的极佳容器。\
-|                 该促动石需绑定至一个和我一样已受$(o)启迪$()的$(hex)咒术师$()。也没有其他意识能将自身的一部分抽离到这种程度了。$(br2)目前还没有。但他们会的。迟早会的。",
-            "2": "此外，如果该促动石能连接到其绑定对象，那种联系便会覆盖虚意识的影响。$(br2)\
-|                 没有意识的思维被绑在晶格上每段思维折叠覆盖尖啸着它不是它这很有道理这没有道理$(k)hello penguin$()$(br2)\
-|                 法术消耗大约 10 个$(media)充能紫水晶$()。"
-        },
         "interop.hexal": {
             title: "咒法拓展-咒法组构学",
             "1": "貌似我曾研究过的$(hex)咒法学$()其他领域能和咒法组构学互相支撑。$(br2)\
-|                 首先，我发现，由$(l:hexbound:patterns/item_patterns#hexbound:get_main_hand)决斗士之纯化$()得来的$(l:hexbound:casting/item_iotas)物品 iota$() 和$(l:hexal:patterns/types#hexal:type/entity)外科医师之纯化$()得来的物品类型 iota 几乎一模一样！\
-|                 涉及它们两者或两者 iota 类型的操作应该都能正常执行。",
-            "2": "其次（但也许这一点更为重要），我发现$(l:hexbound:patterns/constructs/constructs_intro)组构体$()也能维持$(l:hexal:patterns/spells/links)链接$()。这使得组构体可以和咒灵甚至我互相发送 iota！真是激发出了无限的可能性！"
+|                 具体而言，我设计的$(l:hexbound:patterns/constructs/constructs_intro)组构体$()也能维持$(l:hexal:patterns/spells/links)链接$()。\
+|                 这样我就能在咒灵和组构体之间，甚至组构体和我自己之间发送 iota！可能性真是无穷无尽。"
         },
         patterns: {
             pattern_editing: {
@@ -256,22 +210,9 @@
                 rotate: "移除栈顶图案和数，并旋转该图案所给数次。正数顺时针旋转，负数逆时针旋转。",
                 merge: "移除栈顶两个图案，并将其合并，就好像第二个图案的第一笔是从第一个图案收尾处开始的一样。似乎非常大的图案在此操作后会被从中间某一点截断。",
                 line_count: "移除栈顶图案，并返回其笔画数。",
-                start_dir: "移除栈顶图案，并返回一个代表其起始方向的数（取值0~5）。返回的数为 0 代表东北向，1 代表东向，并按顺时针递增。",
+                start_dir: "移除栈顶图案，并返回一个代表其起始方向的数（取值 0~5）。返回的数为 0 代表东北向，1 代表东向，并按顺时针递增。",
                 head: "移除栈顶图案和数。所给数取值下限为 1，上限为所给图案笔画数。返回由该图案中前该数个笔画组成的图案，且保留原图案的起始方向。",
                 tail: "移除栈顶图案和数。效果与起笔之馏化基本一致，但取的是图案倒数所给数个笔画。"
-            },
-            item_patterns: {
-                title: "物品图案",
-                prop: {
-                    item: "将栈顶$(l:hexbound:casting/item_iotas)物品组$()变换为对应物品。",
-                    size: "将栈顶物品组变换为其所含物品数量。"
-                },
-                main_hand: "将栈顶实体变换为其主手中的物品组。对物品展示框和物品实体同样有效。",
-                off_hand: "将栈顶实体变换为其副手中的物品组。",
-                inventory: {
-                    stacks: "移除栈顶位置向量和面向量，并返回与该位置处方块对应面交互时可获得的物品组列表（若面向量为零向量则检索所有面）。",
-                    items: "移除栈顶位置向量和面向量，并返回与该位置处方块对应面交互时可获得的物品列表（若面向量为零向量则检索所有面）。"
-                }
             },
             spells: {
                 pigment_storage: {
@@ -293,12 +234,6 @@
 |                            持续时间则为所给数秒。$(br)每秒持续时间消耗 2 个$(media)紫水晶粉$()。",
                     glitchy: "创造一个不稳定的咒术护盾，其会时不时扭曲变形。此效果只是视觉效果。"
                 }
-            },
-            great_spells: {
-                set_fake_impetus_player: {
-                    "1": "移除栈顶向量，并使该处方块与一$(l:hexbound:casting/figments)虚意识$()绑定。$(br)\
-|                         不过我倒是不清楚这个法术的$(l:hexbound:greatwork/impetus_figment)目标$()应该是什么。"
-                }
             }
         },
         constructs: {
@@ -311,7 +246,7 @@
                 "3": "首先提下限制：$(br)\
 |                     $(li)组构体太过敏感，没法用其自身的$(media)媒质$()施放$(hex)咒术$()。应假设它们没有任何可在这方面消耗的$(media)媒质$()。\
 |                     $(li)大多数能直接影响外在世界的图案，尤其是法术，完全不适用于它们满是限制的伪意识。\
-|                     $(li)上述伪意识和其他$(l:hexbound:casting/figments)虚意识$()行为相同：$(l:hexcasting:patterns/basics#hexcasting:get_caster)意识之精思$()\
+|                     $(li)上述伪意识和我自己的意识行为稍有不同：$(l:hexcasting:patterns/basics#hexcasting:get_caster)意识之精思$()\
 |                     会压入 $(thing)$(l:hexcasting:casting/influences)Null$()，$(l:hexcasting:items/pigments)染色剂$()和$(l:hexcasting:patterns/spells/sentinels)哨卫$()则不会工作。",
                 "4": "现在来讲讲它们的施法机制：$(br)\
 |                     $(li)组构体指令是一个能依次运行的 iota 列表，和其他$(l:hexcasting:items/hexcasting)施法物品$()里存的差不多。\
